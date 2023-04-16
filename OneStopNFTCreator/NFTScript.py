@@ -41,7 +41,7 @@ def mintNFT(algod_client, creator_address, creator_private_key, asset_name, asse
         default_frozen=False,
         unit_name=asset_unit_name,
         asset_name=asset_name,
-        url="ipfs:://QmbPkCn3ZWsFM2cBmNvSGasRTbY97MCxtkrtuFaxbzmqpx#arc3"
+        url="ipfs:://QmWEH9wMbF67t33j8ZX81ZFutyW2t96BgYU61SB16RyK4L#arc3_"
     )
 
     # sign the transaction
