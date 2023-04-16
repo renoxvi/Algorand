@@ -6,36 +6,16 @@ from algosdk import account, mnemonic, transaction
 from algosdk.v2client import algod
 from beaker import sandbox
 
-# def createAccount():
-#     # Create an account
-#     private_key, address = account.generate_account()
-#     print(f"address: {address}")
-#     print(f"private key: {private_key}")
-#     print(f"mnemonic: {mnemonic.from_private_key(private_key)}")
-
-#     # Create a connection to algorand
-#     algodToken = ''
-#     algodServer = 'https://testnet-api.algonode.cloud'
-#     algodPort = None
-#     algod_client = algod.AlgodClient(algodToken, address)
-
-#     # Get account info and print to verify if it works
-#     account_info: Dict[str, Any] = algod_client.account_info(address)
-#     # print(f"account info is {account_info}")
 
 
 def mintNFT(algod_client, creator_address, creator_private_key, asset_name, asset_unit_name):
-    # Get account balance of account
     account_info: Dict[str, Any] = algod_client.account_info(creator_address)
-    print(f"Account balance: {account_info.get('amount')} microAlgos")
 
-    # Get suggested params
-    params = algod_client.suggested_params()
+    sugParams = algod_client.suggested_params()
     
-    # Make transaction
-    unsigned_txn = transaction.AssetCreateTxn(
+    txn = transaction.AssetCreateTxn(
         sender=creator_address, 
-        sp=params, 
+        sp=sugParams, 
         total=1, 
         decimals=0, 
         default_frozen=False,
@@ -44,62 +24,51 @@ def mintNFT(algod_client, creator_address, creator_private_key, asset_name, asse
         url="ipfs:://QmWEH9wMbF67t33j8ZX81ZFutyW2t96BgYU61SB16RyK4L#arc3_"
     )
 
-    # sign the transaction
-    signed_txn = unsigned_txn.sign(creator_private_key)
+    signTxn = txn.sign(creator_private_key)
 
-    # submit the transaction and get back a transaction id
-    txid = algod_client.send_transaction(signed_txn)
-    print("Transaction successfully submitted with txID: {}".format(txid))
+    txid = algod_client.send_transaction(signTxn)
 
     # wait for confirmation
-    txn_result = transaction.wait_for_confirmation(algod_client, txid, 4)
-    created_asset = txn_result["asset-index"]
-    print(f"Asset ID Created is {created_asset}")
+    TxnRes = transaction.wait_for_confirmation(algod_client, txid, 4)
+    CrtAst = TxnRes["asset-index"]
 
-    return created_asset  
+    return CrtAst  
 #confirmed transaction's asset id should be returned
 
 
 def transferNFT(algod_client, creator_address, creator_private_key, receiver_address, receiver_private_key, asset_id):
-    # Account of receiver - Done
+    sugParams = algod_client.suggested_params()
 
-    # Get suggested params
-    params = algod_client.suggested_params()
-
-    # Optin asset transaction
-    optInTxn = transaction.AssetOptInTxn(
+    OTxn = transaction.AssetOptInTxn(
         receiver_address, 
-        sp=params, 
+        sp=sugParams, 
         index = asset_id
     )
        
-    newParams = copy.deepcopy(params)
-    newParams.fee = 2 * params.min_fee
-    newParams.flat_fee = True
+    newsugParams = copy.deepcopy(sugParams)
+    newsugParams.fee = 2 * sugParams.min_fee
+    newsugParams.flat_fee = True
 
-    # Fund Transaction
-    fundTxn = transaction.PaymentTxn(
+    FTxn = transaction.PaymentTxn(
         sender=creator_address, 
-        sp= newParams, 
+        sp= newsugParams, 
         receiver=receiver_address, 
         amt=200_000
     )
 
-    newParams2 = copy.deepcopy(params)
-    newParams2.fee = 0
-    newParams2.flat_fee = True
+    newsugParams2 = copy.deepcopy(sugParams)
+    newsugParams2.fee = 0
+    newsugParams2.flat_fee = True
 
-    # Send Asset transaction
-    assetTxn = transaction.AssetTransferTxn(
+    ATxn = transaction.AssetTransferTxn(
         sender=creator_address, 
-        sp=newParams2, 
+        sp=newsugParams2, 
         receiver=receiver_address, 
         amt=1, 
         index=asset_id
     )
 
-    # Group Transactions
-    txns = [fundTxn, optInTxn, assetTxn]
+    txns = [FTxn, OTxn, ATxn]
     txnGroup = transaction.assign_group_id(txns=txns)
     signedTxns = [
         txns[0].sign(creator_private_key),
@@ -107,6 +76,5 @@ def transferNFT(algod_client, creator_address, creator_private_key, receiver_add
         txns[2].sign(creator_private_key)
     ]
 
-    # Send transactions
     transactRes = algod_client.send_transactions(signedTxns)
     update_result = transaction.wait_for_confirmation(algod_client, transactRes, 4)
