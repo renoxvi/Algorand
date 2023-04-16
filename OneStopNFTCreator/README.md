@@ -1,6 +1,5 @@
 # One Stop NFT Creator
 
-
 ## Problem Statement
 
 Given an image, an asset name ("HackaCoin") and a unit name ("hc"), the competitor should build a python script that generates an ARC-3 (https://github.com/algorandfoundation/ARCs/blob/main/ARCs/arc-0003.md) compliant pure NFT for an address and then transfers it to another (with the corresponding opt-in transaction in between). The only supported metadata fields should be: name, decimals (should be 0 as it is an NFT) and image. The competitor can manually or programatically upload the image and metadata json files to an IPFS service of their choice (e.g. Pinata), taking note of the file’s CID.
