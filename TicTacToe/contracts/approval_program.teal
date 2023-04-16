@@ -1,0 +1,890 @@
+#pragma version 8
+intcblock 0 1 6 5
+bytecblock 0x706c6179696e67 0x626164206d6f7665 0x151f7c75 0x 0x486173205468652047616d6520576f6e3a20 0x47616d652048617320456e646564
+txn NumAppArgs
+intc_0 // 0
+==
+bnz main_l10
+txna ApplicationArgs 0
+pushbytes 0x3b8f1ed5 // "play_game()void"
+==
+bnz main_l9
+txna ApplicationArgs 0
+pushbytes 0xe33a03c0 // "play(uint64)string"
+==
+bnz main_l8
+txna ApplicationArgs 0
+pushbytes 0x4196c6e6 // "play2(uint64)string"
+==
+bnz main_l7
+txna ApplicationArgs 0
+pushbytes 0x42592087 // "atomic_play(appl)string"
+==
+bnz main_l6
+err
+main_l6:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txn GroupIndex
+intc_1 // 1
+-
+store 12
+load 12
+gtxns TypeEnum
+intc_2 // appl
+==
+assert
+load 12
+callsub atomicplay_5
+store 13
+bytec_2 // 0x151f7c75
+load 13
+concat
+log
+intc_1 // 1
+return
+main_l7:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txna ApplicationArgs 1
+btoi
+callsub play2_4
+store 11
+bytec_2 // 0x151f7c75
+load 11
+concat
+log
+intc_1 // 1
+return
+main_l8:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+txna ApplicationArgs 1
+btoi
+callsub play_3
+store 10
+bytec_2 // 0x151f7c75
+load 10
+concat
+log
+intc_1 // 1
+return
+main_l9:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub playgame_1
+intc_1 // 1
+return
+main_l10:
+txn OnCompletion
+intc_0 // NoOp
+==
+bnz main_l14
+txn OnCompletion
+intc_3 // DeleteApplication
+==
+bnz main_l13
+err
+main_l13:
+txn ApplicationID
+intc_0 // 0
+!=
+assert
+callsub delete_12
+intc_1 // 1
+return
+main_l14:
+txn ApplicationID
+intc_0 // 0
+==
+assert
+callsub create_0
+intc_1 // 1
+return
+
+// create
+create_0:
+proto 0 0
+bytec_0 // "playing"
+store 0
+intc_0 // 0
+store 1
+intc_0 // 0
+store 2
+intc_0 // 0
+store 3
+intc_0 // 0
+store 4
+intc_0 // 0
+store 5
+intc_0 // 0
+store 6
+intc_0 // 0
+store 7
+intc_0 // 0
+store 8
+intc_0 // 0
+store 9
+retsub
+
+// play_game
+playgame_1:
+proto 0 0
+txn Sender
+global CreatorAddress
+==
+// unauthorized
+assert
+load 0
+bytec_0 // "playing"
+==
+assert
+retsub
+
+// int_to_ascii
+inttoascii_2:
+proto 1 1
+pushbytes 0x30313233343536373839 // "0123456789"
+frame_dig -1
+intc_1 // 1
+extract3
+retsub
+
+// play
+play_3:
+proto 1 1
+bytec_3 // ""
+txn Sender
+global CreatorAddress
+==
+// unauthorized
+assert
+frame_dig -1
+callsub assertmovevalid_6
+intc_0 // 0
+==
+bnz play_3_l8
+frame_dig -1
+callsub checkifbadmove_10
+intc_1 // 1
+==
+bnz play_3_l7
+load 0
+bytec_0 // "playing"
+!=
+bnz play_3_l6
+intc_1 // 1
+frame_dig -1
+callsub updateMoveState_7
+bytec 4 // "Has The Game Won: "
+callsub checkifwin_9
+callsub inttoascii_2
+concat
+frame_bury 0
+frame_dig 0
+len
+itob
+extract 6 0
+frame_dig 0
+concat
+frame_bury 0
+callsub checkifwin_9
+intc_1 // 1
+==
+bnz play_3_l5
+callsub contractplay_11
+frame_bury 0
+frame_dig 0
+len
+itob
+extract 6 0
+frame_dig 0
+concat
+frame_bury 0
+b play_3_l9
+play_3_l5:
+pushbytes 0x706c617965722077696e73 // "player wins"
+store 0
+b play_3_l9
+play_3_l6:
+bytec 5 // "Game Has Ended"
+frame_bury 0
+frame_dig 0
+len
+itob
+extract 6 0
+frame_dig 0
+concat
+frame_bury 0
+b play_3_l9
+play_3_l7:
+bytec_1 // "bad move"
+frame_bury 0
+frame_dig 0
+len
+itob
+extract 6 0
+frame_dig 0
+concat
+frame_bury 0
+b play_3_l9
+play_3_l8:
+bytec_1 // "bad move"
+frame_bury 0
+frame_dig 0
+len
+itob
+extract 6 0
+frame_dig 0
+concat
+frame_bury 0
+play_3_l9:
+retsub
+
+// play2
+play2_4:
+proto 1 1
+bytec_3 // ""
+txn Sender
+global CreatorAddress
+==
+// unauthorized
+assert
+frame_dig -1
+callsub assertmovevalid_6
+intc_0 // 0
+==
+bnz play2_4_l8
+frame_dig -1
+callsub checkifbadmove_10
+intc_1 // 1
+==
+bnz play2_4_l7
+load 0
+bytec_0 // "playing"
+!=
+bnz play2_4_l6
+txn Sender
+global CallerApplicationAddress
+==
+bnz play2_4_l5
+callsub contractplay_11
+frame_bury 0
+frame_dig 0
+len
+itob
+extract 6 0
+frame_dig 0
+concat
+frame_bury 0
+b play2_4_l9
+play2_4_l5:
+intc_1 // 1
+frame_dig -1
+callsub updateMoveState_7
+bytec 4 // "Has The Game Won: "
+callsub checkifwin_9
+callsub inttoascii_2
+concat
+frame_bury 0
+frame_dig 0
+len
+itob
+extract 6 0
+frame_dig 0
+concat
+frame_bury 0
+b play2_4_l9
+play2_4_l6:
+bytec 5 // "Game Has Ended"
+frame_bury 0
+frame_dig 0
+len
+itob
+extract 6 0
+frame_dig 0
+concat
+frame_bury 0
+b play2_4_l9
+play2_4_l7:
+bytec_1 // "bad move"
+frame_bury 0
+frame_dig 0
+len
+itob
+extract 6 0
+frame_dig 0
+concat
+frame_bury 0
+b play2_4_l9
+play2_4_l8:
+bytec_1 // "bad move"
+frame_bury 0
+frame_dig 0
+len
+itob
+extract 6 0
+frame_dig 0
+concat
+frame_bury 0
+play2_4_l9:
+retsub
+
+// atomic_play
+atomicplay_5:
+proto 1 1
+bytec_3 // ""
+frame_dig -1
+gtxns ApplicationID
+global CallerApplicationID
+==
+assert
+callsub contractplay_11
+frame_bury 0
+frame_dig 0
+len
+itob
+extract 6 0
+frame_dig 0
+concat
+frame_bury 0
+retsub
+
+// assert_move_valid
+assertmovevalid_6:
+proto 1 1
+frame_dig -1
+intc_0 // 0
+>=
+frame_dig -1
+pushint 8 // 8
+<=
+&&
+retsub
+
+// updateMoveState
+updateMoveState_7:
+proto 2 0
+frame_dig -2
+intc_1 // 1
+==
+bnz updateMoveState_7_l2
+frame_dig -1
+pushint 2 // 2
+callsub updateRightState_8
+b updateMoveState_7_l3
+updateMoveState_7_l2:
+frame_dig -1
+intc_1 // 1
+callsub updateRightState_8
+updateMoveState_7_l3:
+retsub
+
+// updateRightState
+updateRightState_8:
+proto 2 0
+frame_dig -2
+intc_0 // 0
+==
+bnz updateRightState_8_l18
+frame_dig -2
+intc_1 // 1
+==
+bnz updateRightState_8_l17
+frame_dig -2
+pushint 2 // 2
+==
+bnz updateRightState_8_l16
+frame_dig -2
+pushint 3 // 3
+==
+bnz updateRightState_8_l15
+frame_dig -2
+pushint 4 // 4
+==
+bnz updateRightState_8_l14
+frame_dig -2
+intc_3 // 5
+==
+bnz updateRightState_8_l13
+frame_dig -2
+intc_2 // 6
+==
+bnz updateRightState_8_l12
+frame_dig -2
+pushint 7 // 7
+==
+bnz updateRightState_8_l11
+frame_dig -2
+pushint 8 // 8
+==
+bnz updateRightState_8_l10
+err
+updateRightState_8_l10:
+frame_dig -1
+store 9
+b updateRightState_8_l19
+updateRightState_8_l11:
+frame_dig -1
+store 8
+b updateRightState_8_l19
+updateRightState_8_l12:
+frame_dig -1
+store 7
+b updateRightState_8_l19
+updateRightState_8_l13:
+frame_dig -1
+store 6
+b updateRightState_8_l19
+updateRightState_8_l14:
+frame_dig -1
+store 5
+b updateRightState_8_l19
+updateRightState_8_l15:
+frame_dig -1
+store 4
+b updateRightState_8_l19
+updateRightState_8_l16:
+frame_dig -1
+store 3
+b updateRightState_8_l19
+updateRightState_8_l17:
+frame_dig -1
+store 2
+b updateRightState_8_l19
+updateRightState_8_l18:
+frame_dig -1
+store 1
+updateRightState_8_l19:
+retsub
+
+// check_if_win
+checkifwin_9:
+proto 0 1
+load 1
+load 2
+==
+load 2
+load 3
+==
+&&
+load 1
+intc_0 // 0
+!=
+&&
+load 2
+intc_0 // 0
+!=
+&&
+load 3
+intc_0 // 0
+!=
+&&
+bnz checkifwin_9_l16
+load 4
+load 5
+==
+load 5
+load 6
+==
+&&
+load 4
+intc_0 // 0
+!=
+&&
+load 5
+intc_0 // 0
+!=
+&&
+load 6
+intc_0 // 0
+!=
+&&
+bnz checkifwin_9_l15
+load 7
+load 8
+==
+load 8
+load 9
+==
+&&
+load 7
+intc_0 // 0
+!=
+&&
+load 8
+intc_0 // 0
+!=
+&&
+load 9
+intc_0 // 0
+!=
+&&
+bnz checkifwin_9_l14
+load 1
+load 4
+==
+load 4
+load 7
+==
+&&
+load 1
+intc_0 // 0
+!=
+&&
+load 4
+intc_0 // 0
+!=
+&&
+load 7
+intc_0 // 0
+!=
+&&
+bnz checkifwin_9_l13
+load 2
+load 5
+==
+load 5
+load 8
+==
+&&
+load 2
+intc_0 // 0
+!=
+&&
+load 5
+intc_0 // 0
+!=
+&&
+load 8
+intc_0 // 0
+!=
+&&
+bnz checkifwin_9_l12
+load 3
+load 6
+==
+load 6
+load 9
+==
+&&
+load 3
+intc_0 // 0
+!=
+&&
+load 6
+intc_0 // 0
+!=
+&&
+load 9
+intc_0 // 0
+!=
+&&
+bnz checkifwin_9_l11
+load 1
+load 5
+==
+load 5
+load 9
+==
+&&
+load 1
+intc_0 // 0
+!=
+&&
+load 5
+intc_0 // 0
+!=
+&&
+load 9
+intc_0 // 0
+!=
+&&
+bnz checkifwin_9_l10
+load 3
+load 5
+==
+load 5
+load 7
+==
+&&
+load 3
+intc_0 // 0
+!=
+&&
+load 5
+intc_0 // 0
+!=
+&&
+load 7
+intc_0 // 0
+!=
+&&
+bnz checkifwin_9_l9
+intc_0 // 0
+b checkifwin_9_l17
+checkifwin_9_l9:
+intc_1 // 1
+b checkifwin_9_l17
+checkifwin_9_l10:
+intc_1 // 1
+b checkifwin_9_l17
+checkifwin_9_l11:
+intc_1 // 1
+b checkifwin_9_l17
+checkifwin_9_l12:
+intc_1 // 1
+b checkifwin_9_l17
+checkifwin_9_l13:
+intc_1 // 1
+b checkifwin_9_l17
+checkifwin_9_l14:
+intc_1 // 1
+b checkifwin_9_l17
+checkifwin_9_l15:
+intc_1 // 1
+b checkifwin_9_l17
+checkifwin_9_l16:
+intc_1 // 1
+checkifwin_9_l17:
+retsub
+
+// check_if_bad_move
+checkifbadmove_10:
+proto 1 1
+frame_dig -1
+intc_0 // 0
+==
+load 1
+intc_0 // 0
+!=
+&&
+bnz checkifbadmove_10_l18
+frame_dig -1
+intc_1 // 1
+==
+load 2
+intc_0 // 0
+!=
+&&
+bnz checkifbadmove_10_l17
+frame_dig -1
+pushint 2 // 2
+==
+load 3
+intc_0 // 0
+!=
+&&
+bnz checkifbadmove_10_l16
+frame_dig -1
+pushint 3 // 3
+==
+load 4
+intc_0 // 0
+!=
+&&
+bnz checkifbadmove_10_l15
+frame_dig -1
+pushint 4 // 4
+==
+load 5
+intc_0 // 0
+!=
+&&
+bnz checkifbadmove_10_l14
+frame_dig -1
+intc_3 // 5
+==
+load 6
+intc_0 // 0
+!=
+&&
+bnz checkifbadmove_10_l13
+frame_dig -1
+intc_2 // 6
+==
+load 7
+intc_0 // 0
+!=
+&&
+bnz checkifbadmove_10_l12
+frame_dig -1
+pushint 7 // 7
+==
+load 8
+intc_0 // 0
+!=
+&&
+bnz checkifbadmove_10_l11
+frame_dig -1
+pushint 8 // 8
+==
+load 9
+intc_0 // 0
+!=
+&&
+bnz checkifbadmove_10_l10
+intc_0 // 0
+b checkifbadmove_10_l19
+checkifbadmove_10_l10:
+intc_1 // 1
+b checkifbadmove_10_l19
+checkifbadmove_10_l11:
+intc_1 // 1
+b checkifbadmove_10_l19
+checkifbadmove_10_l12:
+intc_1 // 1
+b checkifbadmove_10_l19
+checkifbadmove_10_l13:
+intc_1 // 1
+b checkifbadmove_10_l19
+checkifbadmove_10_l14:
+intc_1 // 1
+b checkifbadmove_10_l19
+checkifbadmove_10_l15:
+intc_1 // 1
+b checkifbadmove_10_l19
+checkifbadmove_10_l16:
+intc_1 // 1
+b checkifbadmove_10_l19
+checkifbadmove_10_l17:
+intc_1 // 1
+b checkifbadmove_10_l19
+checkifbadmove_10_l18:
+intc_1 // 1
+checkifbadmove_10_l19:
+retsub
+
+// contract_play
+contractplay_11:
+proto 0 1
+load 1
+intc_0 // 0
+==
+bnz contractplay_11_l18
+load 2
+intc_0 // 0
+==
+bnz contractplay_11_l17
+load 3
+intc_0 // 0
+==
+bnz contractplay_11_l16
+load 4
+intc_0 // 0
+==
+bnz contractplay_11_l15
+load 5
+intc_0 // 0
+==
+bnz contractplay_11_l14
+load 6
+intc_0 // 0
+==
+bnz contractplay_11_l13
+load 7
+intc_0 // 0
+==
+bnz contractplay_11_l12
+load 8
+intc_0 // 0
+==
+bnz contractplay_11_l11
+load 9
+intc_0 // 0
+==
+bnz contractplay_11_l10
+pushbytes 0x64726177 // "draw"
+store 0
+pushbytes 0x436f6e747261637420506c6179656420447261776564 // "Contract Played Drawed"
+b contractplay_11_l19
+contractplay_11_l10:
+intc_0 // 0
+pushint 8 // 8
+callsub updateMoveState_7
+pushbytes 0x436f6e747261637420506c61796564204d6f76652038 // "Contract Played Move 8"
+b contractplay_11_l19
+contractplay_11_l11:
+intc_0 // 0
+pushint 7 // 7
+callsub updateMoveState_7
+pushbytes 0x436f6e747261637420506c61796564204d6f76652037 // "Contract Played Move 7"
+b contractplay_11_l19
+contractplay_11_l12:
+intc_0 // 0
+intc_2 // 6
+callsub updateMoveState_7
+pushbytes 0x436f6e747261637420506c61796564204d6f76652036 // "Contract Played Move 6"
+b contractplay_11_l19
+contractplay_11_l13:
+intc_0 // 0
+intc_3 // 5
+callsub updateMoveState_7
+pushbytes 0x436f6e747261637420506c61796564204d6f76652035 // "Contract Played Move 5"
+b contractplay_11_l19
+contractplay_11_l14:
+intc_0 // 0
+pushint 4 // 4
+callsub updateMoveState_7
+pushbytes 0x436f6e747261637420506c61796564204d6f76652034 // "Contract Played Move 4"
+b contractplay_11_l19
+contractplay_11_l15:
+intc_0 // 0
+pushint 3 // 3
+callsub updateMoveState_7
+pushbytes 0x436f6e747261637420506c61796564204d6f76652033 // "Contract Played Move 3"
+b contractplay_11_l19
+contractplay_11_l16:
+intc_0 // 0
+pushint 2 // 2
+callsub updateMoveState_7
+pushbytes 0x436f6e747261637420506c61796564204d6f76652032 // "Contract Played Move 2"
+b contractplay_11_l19
+contractplay_11_l17:
+intc_0 // 0
+intc_1 // 1
+callsub updateMoveState_7
+pushbytes 0x436f6e747261637420506c61796564204d6f76652031 // "Contract Played Move 1"
+b contractplay_11_l19
+contractplay_11_l18:
+intc_0 // 0
+intc_0 // 0
+callsub updateMoveState_7
+pushbytes 0x436f6e747261637420506c61796564204d6f76652030 // "Contract Played Move 0"
+contractplay_11_l19:
+retsub
+
+// delete
+delete_12:
+proto 0 0
+txn Sender
+global CreatorAddress
+==
+// unauthorized
+assert
+intc_1 // 1
+return
