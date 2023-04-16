@@ -49,14 +49,15 @@ def mintNFT(algod_client, creator_address, creator_private_key, asset_name, asse
 
     # submit the transaction and get back a transaction id
     txid = algod_client.send_transaction(signed_txn)
-    print("Successfully submitted transaction with txID: {}".format(txid))
+    print("Transaction successfully submitted with txID: {}".format(txid))
 
     # wait for confirmation
     txn_result = transaction.wait_for_confirmation(algod_client, txid, 4)
     created_asset = txn_result["asset-index"]
     print(f"Asset ID Created is {created_asset}")
 
-    return created_asset  #your confirmed transaction's asset id should be returned instead
+    return created_asset  
+#confirmed transaction's asset id should be returned
 
 
 def transferNFT(algod_client, creator_address, creator_private_key, receiver_address, receiver_private_key, asset_id):
